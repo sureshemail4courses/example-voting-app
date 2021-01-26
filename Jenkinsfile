@@ -1,54 +1,21 @@
 pipeline {
-  agent {
-    node {
-      label 'ubuntu-1604-aufs-stable'
-    }
-  }
+
+  agent { label 'kubepod' }
   stages {
-    stage('Build result') {
+
+    stage('Checkout Source') {
       steps {
-        sh 'docker build -t dockersamples/result ./result'
+        git url:'https://github.com/sureshemail4courses/example-voting-app.git', branch:'master'
+      }
+    }
+
+    stage('Deploy App to k8s') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "k8s-specifications/apps/", kubeconfigId: "mykubeconfig")
+        }
       }
     } 
-    stage('Build vote') {
-      steps {
-        sh 'docker build -t dockersamples/vote ./vote'
-      }
-    }
-    stage('Build worker') {
-      steps {
-        sh 'docker build -t dockersamples/worker ./worker'
-      }
-    }
-    stage('Push result image') {
-      when {
-        branch 'master'
-      }
-      steps {
-        withDockerRegistry(credentialsId: 'dockerbuildbot-index.docker.io', url:'') {
-          sh 'docker push dockersamples/result'
-        }
-      }
-    }
-    stage('Push vote image') {
-      when {
-        branch 'master'
-      }
-      steps {
-        withDockerRegistry(credentialsId: 'dockerbuildbot-index.docker.io', url:'') {
-          sh 'docker push dockersamples/vote'
-        }
-      }
-    }
-    stage('Push worker image') {
-      when {
-        branch 'master'
-      }
-      steps {
-        withDockerRegistry(credentialsId: 'dockerbuildbot-index.docker.io', url:'') {
-          sh 'docker push dockersamples/worker'
-        }
-      }
-    }
   }
+
 }
