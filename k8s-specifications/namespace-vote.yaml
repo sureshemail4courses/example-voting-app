@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  managedFields:
+  - apiVersion: v1
+    manager: kubectl-create
+    operation: Update
+  name: vote
+spec:
+  finalizers:
+  - kubernetes
